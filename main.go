@@ -26,17 +26,16 @@ func main() {
 			log.Println("Error while binding JSON: ", err.Error())
 		}
 
-		res := controller.NewUser(db, newUser)
+		log.Println(newUser)
 
-		rowsAffected, err := res.RowsAffected()
-		if err != nil {
-			log.Println("Error while getting the rows result: ", err.Error())
-		}
+		res, _ := controller.NewUser(db, newUser)
 
-		if rowsAffected != 1 {
-			c.JSON(500, "Error, the user couldn't be added.")
+		if res == -1 {
+			c.JSON(409, "{\"msg\": \"Username or email taken!.\"}")
+		} else if res == 0 {
+			c.JSON(500, "{\"msg\": \"Error, the user couldn't be added.\"}")
 		} else {
-			c.JSON(200, "User added!")
+			c.JSON(201, "{\"msg\": \"User added!\"}")
 		}
 
 	})

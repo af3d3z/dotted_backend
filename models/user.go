@@ -1,6 +1,8 @@
 package models
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Usuario con todos sus datos
 type User struct {
@@ -12,5 +14,5 @@ type User struct {
 }
 
 func (user User) String() string {
-	return fmt.Sprintf("Id: %s, Username: %s, Email: %s, Pass: %s, Blob is ommitted", user.Id, user.Username, user.Email, user.Pass)
+	return fmt.Sprintf("Id: %s, Username: %s, Email: %s, Pass: %s, Img is ommitted", user.Id, user.Username, user.Email, user.Pass)
 }
