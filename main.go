@@ -31,14 +31,15 @@ func main() {
 		res, _ := controller.NewUser(db, newUser)
 
 		if res == -1 {
-			c.JSON(409, "{\"msg\": \"Username or email taken!.\"}")
+			c.JSON(409, gin.H{"msg": "Username or email taken!."})
 		} else if res == 0 {
-			c.JSON(500, "{\"msg\": \"Error, the user couldn't be added.\"}")
+			c.JSON(500, gin.H{"msg": "Error, the user couldn't be added."})
 		} else {
-			c.JSON(201, "{\"msg\": \"User added!\"}")
+			c.JSON(201, gin.H{"msg": "User added!"})
 		}
-
 	})
+
+	router.GET("/store-user-data", controller.CORSMiddleware())
 
 	router.Run(":8000")
 }
