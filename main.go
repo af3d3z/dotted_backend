@@ -19,7 +19,7 @@ func init() {
 func main() {
 	router := gin.Default()
 
-	router.POST("/users", func(c *gin.Context) {
+	router.POST("/api/users", func(c *gin.Context) {
 		var newUser models.User
 
 		if err := c.BindJSON(&newUser); err != nil {
@@ -39,7 +39,7 @@ func main() {
 		}
 	})
 
-	router.GET("/store-user-data", controller.CORSMiddleware())
+	router.GET("/api/store-user-data", controller.CORSMiddleware())
 
 	router.Run(":8000")
 }
