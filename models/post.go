@@ -5,7 +5,7 @@ import (
 )
 
 type Post struct {
-	PostId  string    `json:"postId"`
+	PostId  int       `json:"postId"`
 	UserId  string    `json:"userId"`
 	PubTime time.Time `json:"pubTime"`
 	Type    string    `json:"type"`

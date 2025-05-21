@@ -19,14 +19,14 @@ func NewUser(db *sql.DB, user models.User) (int64, error) {
 		return -1, nil
 	}
 
-	stmtInsert, err := db.Prepare("INSERT INTO users (id, email, username, img) VALUES(uuid(), ?, ?, ?)")
+	stmtInsert, err := db.Prepare("INSERT INTO users (id, email, username, img) VALUES(?, ?, ?, ?)")
 	if err != nil {
 		log.Println("Couldn't prepare the user for insertion:", err)
 		return 0, err
 	}
 	defer stmtInsert.Close()
 
-	res, err := stmtInsert.Exec(user.Email, user.Username, user.Img)
+	res, err := stmtInsert.Exec(user.Id, user.Email, user.Username, user.Img)
 	if err != nil {
 		log.Println("Couldn't insert the user:", err)
 		return 0, err
@@ -39,4 +39,85 @@ func NewUser(db *sql.DB, user models.User) (int64, error) {
 	}
 
 	return rows, nil
+}
+
+func GetUser(db *sql.DB, userId string) (models.User, error) {
+	var user models.User
+
+	var img []byte
+	var description sql.NullString
+
+	err := db.QueryRow("SELECT id, username, email, img, description FROM users where id = ?", userId).Scan(&user.Id, &user.Username, &user.Email, &img, &description)
+	if err != nil {
+		log.Println("Couldn't access user ", userId, user.Email, err.Error())
+	}
+
+	if img != nil {
+		user.Img = make([]byte, len(img))
+		copy(user.Img, img)
+	} else {
+		user.Img = nil
+	}
+
+	if description.Valid {
+		user.Description = description.String
+	} else {
+		user.Description = ""
+	}
+
+	return user, err
+}
+
+func GetPosts(db *sql.DB, userId string) ([]models.Post, error) {
+	var posts []models.Post
+
+	rows, err := db.Query("SELECT * FROM posts WHERE userId = ?", userId)
+	if err != nil {
+		log.Println(err.Error())
+	} else {
+		for rows.Next() {
+			var post models.Post
+
+			err := rows.Scan(&post.PostId, &post.UserId, &post.PubTime, &post.Type, &post.Value)
+			if err != nil {
+				log.Println(err.Error())
+			}
+
+			posts = append(posts, post)
+		}
+	}
+
+	return posts, err
+}
+
+func AddPost(db *sql.DB, post models.Post) bool {
+	inserted := true
+	query := "INSERT INTO posts (userId, pubTime, type, value) VALUES (?, ?, ?, ?)"
+	insert, err := db.Prepare(query)
+	if err != nil {
+		log.Println(err.Error())
+		inserted = false
+	} else {
+		res, err := insert.Exec(post.UserId, post.PubTime, post.Type, post.Value)
+		if err != nil {
+			log.Println(err.Error())
+			log.Println(post.UserId, post.PubTime, post.Type)
+			inserted = false
+		} else {
+			insert.Close()
+			rows, err := res.RowsAffected()
+			if err != nil {
+				log.Println(err.Error())
+				inserted = false
+			} else {
+				if rows != 1 {
+					log.Println("Could not insert")
+					inserted = false
+				}
+			}
+		}
+	}
+
+	return inserted
+
 }
